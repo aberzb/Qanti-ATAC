@@ -1,0 +1,38 @@
+seed: 7
+device: "cuda"   # or "cpu"
+
+data:
+  train_npz: "data/train.npz"
+  val_npz: "data/val.npz"
+  batch_size: 64
+  num_workers: 2
+
+model:
+  atac:
+    in_channels: 1
+    # input shape: [B, 1, 11] if 11 bins; can be more bins if you extend
+    channels: [16, 32]
+    kernels: [3, 5]       # mixed kernels
+    dropout: 0.1
+
+  dna:
+    # sequence input: [B, 4, L]
+    channels: [64, 64, 128]
+    kernel_size: 15
+    num_res_blocks: 3
+    dropout: 0.1
+    use_pwm: true
+    pwm_dim: 512          # e.g., number of PWM features you compute
+
+  joint:
+    hidden: [256, 128]
+    dropout: 0.2
+    out_bins: 11          # predict openness for each bin
+    # output is sigmoid in [0,1]; multiply by 100 to get %
+
+train:
+  lr: 0.0005
+  weight_decay: 0.01
+  epochs: 20
+  loss: "bce"            # "bce" for probabilistic openness; "mse" if you have continuous targets
+  log_every: 50
